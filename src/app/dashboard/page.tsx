@@ -3,16 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { ImageUploader } from "@/components/global/image-uploader";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import TextCustomizer from "@/components/editor/text-customizer";
 import {
   Card,
   CardContent,
@@ -27,28 +18,77 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Download, ImageIcon, Type, Wand2 } from 'lucide-react';
+import { Download, ImageIcon, PlusIcon, Type, Wand2 } from 'lucide-react';
 import { ModeToggle } from "@/components/global/mode-toggle";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Accordion } from "@/components/ui/accordion";
 
 interface UploadedImage {
   url: string;
   file: File;
 }
 
+interface TextSet {
+  id: number;
+  text: string;
+  fontFamily: string;
+  fontSize: number;
+  color: string;
+  top: number;
+  left: number;
+  opacity: number;
+  rotation: number;
+  fontWeight: number;
+  shadowColor: string;
+  shadowSize: number;
+}
+
 export default function Page() {
   const [uploadedImage, setUploadedImage] = useState<UploadedImage | null>(null);
-  const [overlayText, setOverlayText] = useState("Your text here");
-  const [fontSize, setFontSize] = useState(32);
-  const [textColor, setTextColor] = useState("#ffffff");
-  const [textPosition, setTextPosition] = useState("center");
+  const [textSets, setTextSets] = useState<TextSet[]>([]);
   const previewCanvasRef = useRef<HTMLCanvasElement>(null);
+
+  const addNewTextSet = () => {
+    const newId = Math.max(...textSets.map((set) => set.id), 0) + 1;
+    setTextSets((prev) => [
+      ...prev,
+      {
+        id: newId,
+        text: "edit",
+        fontFamily: "Inter",
+        top: 0,
+        left: 0,
+        color: "white",
+        fontSize: 200,
+        fontWeight: 800,
+        opacity: 1,
+        shadowColor: "rgba(0, 0, 0, 0.8)",
+        shadowSize: 4,
+        rotation: 0,
+      },
+    ]);
+  };
+
+  const removeTextSet = (id: number) => {
+    setTextSets((prev) => prev.filter((set) => set.id !== id));
+  };
+
+  const duplicateTextSet = (textSet: TextSet) => {
+    const newId = Math.max(...textSets.map((set) => set.id), 0) + 1;
+    setTextSets((prev) => [...prev, { ...textSet, id: newId }]);
+  };
 
   const handleImageUpload = (url: string, file: File) => {
     setUploadedImage({ url, file });
   };
 
-  // Function to update the preview canvas
-  useEffect(() => {
+  const handleAttributeChange = (id: number, attribute: string, value: any) => {
+    setTextSets((prev) =>
+      prev.map((set) => (set.id === id ? { ...set, [attribute]: value } : set))
+    );
+  };
+
+  const renderCanvas = () => {
     if (!uploadedImage || !previewCanvasRef.current) return;
 
     const canvas = previewCanvasRef.current;
@@ -57,39 +97,81 @@ export default function Page() {
 
     const img = new Image();
     img.crossOrigin = "anonymous";
-    img.src = uploadedImage.url;
-
+    
     img.onload = () => {
-      // Set canvas size to match image aspect ratio
-      const aspectRatio = img.width / img.height;
-      canvas.width = 800;
-      canvas.height = 800 / aspectRatio;
+      // Set canvas size to match image aspect ratio while fitting in container
+      const containerWidth = canvas.parentElement?.clientWidth || 800;
+      const scale = containerWidth / img.width;
+      canvas.width = containerWidth;
+      canvas.height = img.height * scale;
 
-      // Draw image
+      // Clear canvas and draw image
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-      // Add text
-      ctx.font = `${fontSize}px Arial`;
-      ctx.fillStyle = textColor;
-      ctx.textAlign = "center";
+      // Draw each text set
+      textSets.forEach((textSet) => {
+        ctx.save();
 
-      // Calculate text position
-      const x = canvas.width / 2;
-      let y;
-      switch (textPosition) {
-        case "top":
-          y = fontSize + 20;
-          break;
-        case "bottom":
-          y = canvas.height - 20;
-          break;
-        default: // center
-          y = canvas.height / 2;
-      }
+        // Set text properties
+        try {
+          ctx.font = `${textSet.fontWeight} ${textSet.fontSize}px "${textSet.fontFamily}"`;
+        } catch (e) {
+          console.error('Font error:', e);
+          ctx.font = `${textSet.fontWeight} ${textSet.fontSize}px Arial`;
+        }
+        
+        ctx.fillStyle = textSet.color;
+        ctx.globalAlpha = textSet.opacity;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
 
-      ctx.fillText(overlayText, x, y);
+        // Calculate position
+        const x = (canvas.width * (textSet.left + 50)) / 100;
+        const y = (canvas.height * (50 - textSet.top)) / 100;
+
+        // Apply transformations
+        ctx.translate(x, y);
+        ctx.rotate((textSet.rotation * Math.PI) / 180);
+
+        // Add shadow if specified
+        if (textSet.shadowColor && textSet.shadowSize) {
+          ctx.shadowColor = textSet.shadowColor;
+          ctx.shadowBlur = textSet.shadowSize;
+        }
+
+        // Draw text
+        ctx.fillText(textSet.text, 0, 0);
+        ctx.restore();
+      });
     };
-  }, [uploadedImage, overlayText, fontSize, textColor, textPosition]);
+
+    img.src = uploadedImage.url;
+  };
+
+  // Update canvas when image or text sets change
+  useEffect(() => {
+    renderCanvas();
+    
+    // Add resize observer to handle container size changes
+    const observer = new ResizeObserver(() => renderCanvas());
+    if (previewCanvasRef.current?.parentElement) {
+      observer.observe(previewCanvasRef.current.parentElement);
+    }
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [uploadedImage, textSets]);
+
+  const handleExport = (format: 'png' | 'jpeg') => {
+    if (!previewCanvasRef.current) return;
+    
+    const link = document.createElement("a");
+    link.download = `image-with-text.${format}`;
+    link.href = previewCanvasRef.current.toDataURL(`image/${format}`);
+    link.click();
+  };
 
   return (
     <div className="min-h-screen p-6">
@@ -103,25 +185,43 @@ export default function Page() {
           </div>
           <div className="flex items-center gap-2">
             {uploadedImage && (
-              <Button
-                variant="outline"
-                onClick={() => document.getElementById('file-upload')?.click()}
-              >
-                <input
-                  type="file"
-                  id="file-upload"
-                  className="hidden"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      const url = URL.createObjectURL(file);
-                      handleImageUpload(url, file);
+              <>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => document.getElementById("file-upload")?.click()}
+                >
+                  <input
+                    type="file"
+                    id="file-upload"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const url = URL.createObjectURL(file);
+                        handleImageUpload(url, file);
+                      }
+                    }}
+                  />
+                  <ImageIcon className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => {
+                    if (previewCanvasRef.current) {
+                      const dataUrl = previewCanvasRef.current.toDataURL('image/png');
+                      const link = document.createElement('a');
+                      link.download = 'text-behind-image.png';
+                      link.href = dataUrl;
+                      link.click();
                     }
                   }}
-                />
-                Upload Image
-              </Button>
+                >
+                  <Download className="h-4 w-4" />
+                </Button>
+              </>
             )}
             <ModeToggle />
           </div>
@@ -131,7 +231,9 @@ export default function Page() {
           <Card>
             <CardHeader>
               <CardTitle>Upload Image</CardTitle>
-              <CardDescription>Choose an image to add text overlay</CardDescription>
+              <CardDescription>
+                Choose an image to add text overlay
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <ImageUploader onUploadComplete={handleImageUpload} />
@@ -139,196 +241,39 @@ export default function Page() {
           </Card>
         ) : (
           <div className="grid gap-6 lg:grid-cols-2">
-            <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Text Customization</CardTitle>
-                  <CardDescription>
-                    Customize how your text appears on the image
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="overlay-text">Overlay Text</Label>
-                    <Input
-                      id="overlay-text"
-                      value={overlayText}
-                      onChange={(e) => setOverlayText(e.target.value)}
-                      placeholder="Enter your text"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="font-size">Font Size: {fontSize}px</Label>
-                    <Slider
-                      id="font-size"
-                      min={12}
-                      max={72}
-                      step={1}
-                      value={[fontSize]}
-                      onValueChange={(value) => setFontSize(value[0])}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="text-color">Text Color</Label>
-                    <div className="flex gap-2">
-                      <Input
-                        id="text-color"
-                        type="color"
-                        value={textColor}
-                        onChange={(e) => setTextColor(e.target.value)}
-                        className="w-24"
+            <div className="flex flex-col w-full">
+              <Button variant={"secondary"} onClick={addNewTextSet}>
+                <PlusIcon className="mr-2" /> Add New Text Set
+              </Button>
+              <ScrollArea className="h-[calc(100vh-10rem)] p-2">
+                <div className="pr-4">
+                  <Accordion type="single" collapsible className="w-full mt-2">
+                    {textSets.map((textSet) => (
+                      <TextCustomizer
+                        key={textSet.id}
+                        textSet={textSet}
+                        handleAttributeChange={handleAttributeChange}
+                        removeTextSet={removeTextSet}
+                        duplicateTextSet={duplicateTextSet}
+                        userId="1"
                       />
-                      <Input
-                        value={textColor}
-                        onChange={(e) => setTextColor(e.target.value)}
-                        placeholder="#000000"
-                        className="flex-1"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="text-position">Text Position</Label>
-                    <Select value={textPosition} onValueChange={setTextPosition}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select position" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="top">Top</SelectItem>
-                        <SelectItem value="center">Center</SelectItem>
-                        <SelectItem value="bottom">Bottom</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </CardContent>
-              </Card>
+                    ))}
+                  </Accordion>
+                </div>
+              </ScrollArea>
             </div>
 
-            {/* Right Column - Preview */}
             <div className="space-y-6">
               <Card className="flex-1">
-                <CardHeader>
-                  <CardTitle>Preview</CardTitle>
-                  <CardDescription>
-                    See how your image will look with the text overlay
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Tabs defaultValue="preview" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2">
-                      <TabsTrigger value="preview">Preview</TabsTrigger>
-                      <TabsTrigger value="code">Export</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="preview" className="mt-4">
-                      <div className="aspect-video relative rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted overflow-hidden">
-                        <canvas
-                          ref={previewCanvasRef}
-                          className="w-full h-full object-contain"
-                        />
-                      </div>
-                    </TabsContent>
-                    <TabsContent value="code" className="mt-4">
-                      <div className="space-y-4">
-                        <p className="text-sm text-muted-foreground">
-                          Your image is ready to be exported. Choose your preferred
-                          format below.
-                        </p>
-                        <div className="flex gap-2">
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  className="flex-1"
-                                  onClick={() => {
-                                    if (previewCanvasRef.current) {
-                                      const link = document.createElement("a");
-                                      link.download = "image-with-text.png";
-                                      link.href = previewCanvasRef.current.toDataURL(
-                                        "image/png"
-                                      );
-                                      link.click();
-                                    }
-                                  }}
-                                >
-                                  <ImageIcon className="mr-2 h-4 w-4" />
-                                  Export as PNG
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>Download as PNG image</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  className="flex-1"
-                                  onClick={() => {
-                                    if (previewCanvasRef.current) {
-                                      const link = document.createElement("a");
-                                      link.download = "image-with-text.jpg";
-                                      link.href = previewCanvasRef.current.toDataURL(
-                                        "image/jpeg"
-                                      );
-                                      link.click();
-                                    }
-                                  }}
-                                >
-                                  <Download className="mr-2 h-4 w-4" />
-                                  Export as JPEG
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>Download as JPEG image</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </div>
-                      </div>
-                    </TabsContent>
-                  </Tabs>
+                <CardContent className="pt-6">
+                  <div className="aspect-video relative rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted overflow-hidden">
+                    <canvas
+                      ref={previewCanvasRef}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
                 </CardContent>
               </Card>
-
-              {/* Quick Actions */}
-              <div className="grid grid-cols-2 gap-4">
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="flex items-center space-x-4">
-                      <div className="rounded-lg border bg-card p-2">
-                        <Wand2 className="h-6 w-6" />
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-sm font-medium">Auto Enhance</p>
-                        <p className="text-xs text-muted-foreground">
-                          Automatically adjust text position
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="flex items-center space-x-4">
-                      <div className="rounded-lg border bg-card p-2">
-                        <Type className="h-6 w-6" />
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-sm font-medium">Font Styles</p>
-                        <p className="text-xs text-muted-foreground">
-                          Choose from premium fonts
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
             </div>
           </div>
         )}
