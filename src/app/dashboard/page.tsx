@@ -27,7 +27,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Download, ImageIcon, Type, Wand2 } from "lucide-react";
+import { Download, ImageIcon, Type, Wand2 } from 'lucide-react';
 import { ModeToggle } from "@/components/global/mode-toggle";
 
 interface UploadedImage {
@@ -36,9 +36,7 @@ interface UploadedImage {
 }
 
 export default function Page() {
-  const [uploadedImage, setUploadedImage] = useState<UploadedImage | null>(
-    null
-  );
+  const [uploadedImage, setUploadedImage] = useState<UploadedImage | null>(null);
   const [overlayText, setOverlayText] = useState("Your text here");
   const [fontSize, setFontSize] = useState(32);
   const [textColor, setTextColor] = useState("#ffffff");
@@ -99,46 +97,49 @@ export default function Page() {
         {/* Header */}
         <div className="flex justify-between items-center">
           <div className="flex flex-col space-y-2">
-            <h1
-              className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-b from-white to-zinc-500 inline-block text-transparent bg-clip-text">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-b from-white to-zinc-500 inline-block text-transparent bg-clip-text">
               Opal
             </h1>
           </div>
-          <ModeToggle />
+          <div className="flex items-center gap-2">
+            {uploadedImage && (
+              <Button
+                variant="outline"
+                onClick={() => document.getElementById('file-upload')?.click()}
+              >
+                <input
+                  type="file"
+                  id="file-upload"
+                  className="hidden"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const url = URL.createObjectURL(file);
+                      handleImageUpload(url, file);
+                    }
+                  }}
+                />
+                Upload Image
+              </Button>
+            )}
+            <ModeToggle />
+          </div>
         </div>
 
         {!uploadedImage ? (
-          // Show only upload card initially
           <Card>
             <CardHeader>
               <CardTitle>Upload Image</CardTitle>
-              <CardDescription>
-                Choose an image to add text overlay
-              </CardDescription>
+              <CardDescription>Choose an image to add text overlay</CardDescription>
             </CardHeader>
             <CardContent>
               <ImageUploader onUploadComplete={handleImageUpload} />
             </CardContent>
           </Card>
         ) : (
-          // Show full layout after upload
           <div className="grid gap-6 lg:grid-cols-2">
-            {/* Left Column - Controls */}
             <div className="space-y-6">
-              {/* Image Upload Card */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Upload Image</CardTitle>
-                  <CardDescription>
-                    Choose an image to add text overlay
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ImageUploader onUploadComplete={handleImageUpload} />
-                </CardContent>
-              </Card>
-
-              {/* Text Customization Card */}
               <Card>
                 <CardHeader>
                   <CardTitle>Text Customization</CardTitle>
@@ -190,10 +191,7 @@ export default function Page() {
 
                   <div className="space-y-2">
                     <Label htmlFor="text-position">Text Position</Label>
-                    <Select
-                      value={textPosition}
-                      onValueChange={setTextPosition}
-                    >
+                    <Select value={textPosition} onValueChange={setTextPosition}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select position" />
                       </SelectTrigger>
@@ -234,8 +232,8 @@ export default function Page() {
                     <TabsContent value="code" className="mt-4">
                       <div className="space-y-4">
                         <p className="text-sm text-muted-foreground">
-                          Your image is ready to be exported. Choose your
-                          preferred format below.
+                          Your image is ready to be exported. Choose your preferred
+                          format below.
                         </p>
                         <div className="flex gap-2">
                           <TooltipProvider>
@@ -248,10 +246,9 @@ export default function Page() {
                                     if (previewCanvasRef.current) {
                                       const link = document.createElement("a");
                                       link.download = "image-with-text.png";
-                                      link.href =
-                                        previewCanvasRef.current.toDataURL(
-                                          "image/png"
-                                        );
+                                      link.href = previewCanvasRef.current.toDataURL(
+                                        "image/png"
+                                      );
                                       link.click();
                                     }
                                   }}
@@ -276,10 +273,9 @@ export default function Page() {
                                     if (previewCanvasRef.current) {
                                       const link = document.createElement("a");
                                       link.download = "image-with-text.jpg";
-                                      link.href =
-                                        previewCanvasRef.current.toDataURL(
-                                          "image/jpeg"
-                                        );
+                                      link.href = previewCanvasRef.current.toDataURL(
+                                        "image/jpeg"
+                                      );
                                       link.click();
                                     }
                                   }}
@@ -340,3 +336,4 @@ export default function Page() {
     </div>
   );
 }
+
