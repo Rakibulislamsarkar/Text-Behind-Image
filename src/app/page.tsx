@@ -1,16 +1,16 @@
-'use client'
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { MenuIcon, ArrowUpRight } from 'lucide-react'
-import Link from "next/link"
-import { motion, AnimatePresence } from "framer-motion"
-import { InfiniteCarousel } from "@/components/global/Infinite-carousel"
-import { InfiniteCarousel2 } from "@/components/global/Infinite-carousel-2"
-import { useState } from "react"
-import Image from "next/image"
+import { Button } from "@/components/ui/button";
+import { MenuIcon, ArrowUpRight } from "lucide-react";
+import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
+import { InfiniteCarousel } from "@/components/global/Infinite-carousel";
+import { InfiniteCarousel2 } from "@/components/global/Infinite-carousel-2";
+import { useState } from "react";
+import Image from "next/image";
 
 export default function Home() {
-  const [menuOpen, setMenuOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-[#080808] text-white relative">
@@ -19,8 +19,15 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-2">
-              <Image src="/opal-logo.svg" width={30} height={30} alt="Opal Logo" />
-              <span className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-b from-white to-zinc-500 inline-block text-transparent bg-clip-text">Opal</span>
+              <Image
+                src="/opal-logo.svg"
+                width={30}
+                height={30}
+                alt="Opal Logo"
+              />
+              <span className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-b from-white to-zinc-500 inline-block text-transparent bg-clip-text">
+                Opal
+              </span>
             </div>
             <div className="hidden md:flex items-center gap-4">
               <Button variant="secondary">Login</Button>
@@ -74,8 +81,8 @@ export default function Home() {
                 Effortlessly add text behind an image.
               </h1>
               <p className="text-lg md:text-lg text-gray-400 mb-8 max-w-3xl mx-auto leading-5">
-                Enhance your visuals effortlessly with seamless text overlays that
-                captivate and inspire.
+                Enhance your visuals effortlessly with seamless text overlays
+                that captivate and inspire.
               </p>
               <div className="mt-10 flex justify-center gap-4">
                 <Button className="rounded-full" size="lg" asChild>
@@ -94,14 +101,12 @@ export default function Home() {
           <InfiniteCarousel />
           <InfiniteCarousel2 />
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            
-              <p className="text-base md:text-2xl lg:text-[23.97px] md:tracking-[-0.13485px] md:leading-[28px] lg:tracking-[-0.13485px] lg:leading-[28px] tracking-[-0.3px] leading-[20px] mt-10 mb-10 text-gray-400">
-                Opal uses advanced AI to effortlessly place text behind any image,
-                creating visually stunning designs and empowering creators and
-                businesses to craft captivating visuals with ease.
-              </p>
-            </div>
-          
+            <p className="text-base md:text-2xl lg:text-[23.97px] md:tracking-[-0.13485px] md:leading-[28px] lg:tracking-[-0.13485px] lg:leading-[28px] tracking-[-0.3px] leading-[20px] mt-10 mb-10 text-gray-400">
+              Opal uses advanced AI to effortlessly place text behind any image,
+              creating visually stunning designs and empowering creators and
+              businesses to craft captivating visuals with ease.
+            </p>
+          </div>
         </section>
 
         {/* Safety Section - Consistent spacing */}
@@ -140,7 +145,11 @@ export default function Home() {
                   Enhance Instagram with AI for stunning text-visual content!
                 </h2>
                 <div className="mt-10">
-                  <Button className="rounded-full bg-white text-black hover:bg-gray-200" size="lg" asChild>
+                  <Button
+                    className="rounded-full bg-white text-black hover:bg-gray-200"
+                    size="lg"
+                    asChild
+                  >
                     <Link href="/dashboard">
                       Try Opal
                       <ArrowUpRight className="ml-2" size={18} />
@@ -151,7 +160,31 @@ export default function Home() {
             </motion.div>
           </div>
         </section>
+        <div className="py-20 sm:py-32">
+          <div className="mx-auto max-w-7xl flex flex-col justify-center px-4 sm:px-6 lg:px-8 gap-7">
+            <h1 className="text-2xl lg:text-4xl xl:text-4xl tracking-tight font-medium bg-gradient-to-b from-white to-zinc-500 inline-block text-transparent bg-clip-text ">
+              Opal / Text Behind Imaage <br /> is completely open source.
+            </h1>
+            <p className="text-lg md:text-lg text-gray-400 mb-8">
+              100% of the app's code is available on Github; check it out and
+              contribute.
+            </p>
+          </div>
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <Button className="rounded-full" size="lg" asChild>
+              <Link href="https://github.com/Rakibulislamsarkar/Text-Behind-Image">
+                Github
+                <ArrowUpRight className="ml-2" size={18} />
+              </Link>
+            </Button>
+            </div>
+        </div>
+            <footer className="mx-auto max-w-7xl flex flex-col justify-center px-4 sm:px-6 lg:px-8 pb-5">
+            <h1 className="text-2xl lg:text-4xl xl:text-4xl tracking-tight font-medium bg-gradient-to-b from-white to-zinc-500 inline-block text-transparent bg-clip-text ">
+            2024 @  All Rights Reserved - Created by Rakibul Islam Sarkar
+            </h1>
+            </footer>
       </main>
     </div>
-  )
+  );
 }
