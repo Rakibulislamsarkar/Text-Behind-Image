@@ -11,17 +11,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Download, ImageIcon, PlusIcon, Type, Wand2 } from 'lucide-react';
+
+import { Download, ImageIcon, PlusIcon, Type, Wand2 } from "lucide-react";
 import { ModeToggle } from "@/components/global/mode-toggle";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Accordion } from "@/components/ui/accordion";
+import "@/app/fonts.css";
 
 interface UploadedImage {
   url: string;
@@ -44,7 +39,9 @@ interface TextSet {
 }
 
 export default function Page() {
-  const [uploadedImage, setUploadedImage] = useState<UploadedImage | null>(null);
+  const [uploadedImage, setUploadedImage] = useState<UploadedImage | null>(
+    null
+  );
   const [textSets, setTextSets] = useState<TextSet[]>([]);
   const previewCanvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -97,7 +94,7 @@ export default function Page() {
 
     const img = new Image();
     img.crossOrigin = "anonymous";
-    
+
     img.onload = () => {
       // Set canvas size to match image aspect ratio while fitting in container
       const containerWidth = canvas.parentElement?.clientWidth || 800;
@@ -117,10 +114,10 @@ export default function Page() {
         try {
           ctx.font = `${textSet.fontWeight} ${textSet.fontSize}px "${textSet.fontFamily}"`;
         } catch (e) {
-          console.error('Font error:', e);
+          console.error("Font error:", e);
           ctx.font = `${textSet.fontWeight} ${textSet.fontSize}px Arial`;
         }
-        
+
         ctx.fillStyle = textSet.color;
         ctx.globalAlpha = textSet.opacity;
         ctx.textAlign = "center";
@@ -152,7 +149,7 @@ export default function Page() {
   // Update canvas when image or text sets change
   useEffect(() => {
     renderCanvas();
-    
+
     // Add resize observer to handle container size changes
     const observer = new ResizeObserver(() => renderCanvas());
     if (previewCanvasRef.current?.parentElement) {
@@ -164,9 +161,9 @@ export default function Page() {
     };
   }, [uploadedImage, textSets]);
 
-  const handleExport = (format: 'png' | 'jpeg') => {
+  const handleExport = (format: "png" | "jpeg") => {
     if (!previewCanvasRef.current) return;
-    
+
     const link = document.createElement("a");
     link.download = `image-with-text.${format}`;
     link.href = previewCanvasRef.current.toDataURL(`image/${format}`);
@@ -175,8 +172,8 @@ export default function Page() {
 
   return (
     <div className="min-h-screen p-6">
-      <div className="mx-auto max-w-7xl space-y-6">
-        {/* Header */}
+      <div className="mx-auto max-w-7xl space-y-4">
+        {/* Header - unchanged */}
         <div className="flex justify-between items-center">
           <div className="flex flex-col space-y-2">
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-b from-white to-zinc-500 inline-block text-transparent bg-clip-text">
@@ -188,8 +185,9 @@ export default function Page() {
               <>
                 <Button
                   variant="outline"
-                  size="icon"
-                  onClick={() => document.getElementById("file-upload")?.click()}
+                  onClick={() =>
+                    document.getElementById("file-upload")?.click()
+                  }
                 >
                   <input
                     type="file"
@@ -204,20 +202,12 @@ export default function Page() {
                       }
                     }}
                   />
-                  <ImageIcon className="h-4 w-4" />
+                  Upload Image
                 </Button>
                 <Button
                   variant="outline"
                   size="icon"
-                  onClick={() => {
-                    if (previewCanvasRef.current) {
-                      const dataUrl = previewCanvasRef.current.toDataURL('image/png');
-                      const link = document.createElement('a');
-                      link.download = 'text-behind-image.png';
-                      link.href = dataUrl;
-                      link.click();
-                    }
-                  }}
+                  onClick={() => handleExport("png")}
                 >
                   <Download className="h-4 w-4" />
                 </Button>
@@ -240,9 +230,24 @@ export default function Page() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-6 lg:grid-cols-2">
+          <div className="grid gap-4 lg:grid-cols-2">
+            {/* Preview Section - Now comes first on mobile */}
+               <Card className="relative flex items-center justify-center rounded-lg border border-dashed border-muted-foreground/25 bg-muted overflow-hidden w-full">
+      <div className="w-full pb-[177.78%] md:pb-[56.25%]">
+        <canvas
+          ref={previewCanvasRef}
+          className="absolute top-0 left-0 w-full h-full"
+          style={{
+            objectFit: "contain",
+            objectPosition: "center",
+          }}
+        />
+      </div>
+    </Card>
+
+            {/* Editor Section */}
             <div className="flex flex-col w-full">
-              <Button variant={"secondary"} onClick={addNewTextSet}>
+              <Button variant="secondary" onClick={addNewTextSet}>
                 <PlusIcon className="mr-2" /> Add New Text Set
               </Button>
               <ScrollArea className="h-[calc(100vh-10rem)] p-2">
@@ -260,20 +265,8 @@ export default function Page() {
                     ))}
                   </Accordion>
                 </div>
+                <ScrollBar orientation="vertical" />
               </ScrollArea>
-            </div>
-
-            <div className="space-y-6">
-              <Card className="flex-1">
-                <CardContent className="pt-6">
-                  <div className="aspect-video relative rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted overflow-hidden">
-                    <canvas
-                      ref={previewCanvasRef}
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
             </div>
           </div>
         )}
@@ -281,4 +274,3 @@ export default function Page() {
     </div>
   );
 }
-

@@ -9,16 +9,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import {
-  Move,
-  Text,
-  Bold,
-  RotateCw,
-  Palette,
-  LightbulbIcon,
-  CaseSensitive,
-  TypeOutline,
-} from "lucide-react";
+import { Move, Text, Bold, RotateCw, Palette, LightbulbIcon, CaseSensitive, TypeIcon as TypeOutline } from 'lucide-react';
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 interface TextCustomizerProps {
@@ -63,12 +54,12 @@ const TextCustomizer: React.FC<TextCustomizerProps> = ({
   ];
 
   return (
-    <AccordionItem value={`item-${textSet.id}`}>
+    <AccordionItem value={`item-${textSet.id}`} className="w-full max-w-full overflow-hidden">
       <AccordionTrigger>{textSet.text}</AccordionTrigger>
-      <AccordionContent>
+      <AccordionContent className="w-full max-w-full overflow-hidden">
         {/* Mobile Controls */}
-        <div className="md:hidden">
-          <ScrollArea className="w-full">
+        <div className="md:hidden w-full max-w-full overflow-hidden">
+          <ScrollArea className="w-full max-w-[calc(100vw-3rem)]">
             <div className="flex w-max gap-1 mb-2 p-1">
               {controls.map((control) => (
                 <button
@@ -92,7 +83,7 @@ const TextCustomizer: React.FC<TextCustomizerProps> = ({
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
 
-          <div>
+          <div className="w-full max-w-full overflow-hidden">
             {activeControl === "text" && (
               <InputField
                 attribute="text"
@@ -212,7 +203,7 @@ const TextCustomizer: React.FC<TextCustomizerProps> = ({
         </div>
 
         {/* Desktop Layout */}
-        <div className="hidden md:block">
+        <div className="hidden md:block w-full max-w-full overflow-hidden">
           <InputField
             attribute="text"
             label="Text"
@@ -229,7 +220,7 @@ const TextCustomizer: React.FC<TextCustomizerProps> = ({
             }
             userId={userId}
           />
-          <div className="flex flex-row items-start justify-start gap-10 w-full">
+          <div className="flex flex-row items-start justify-start gap-10 w-full max-w-full overflow-hidden">
             <ColorPicker
               attribute="color"
               label="Text Color"
@@ -324,3 +315,4 @@ const TextCustomizer: React.FC<TextCustomizerProps> = ({
 };
 
 export default TextCustomizer;
+
