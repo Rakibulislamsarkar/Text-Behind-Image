@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-import { Download, ImageIcon, PlusIcon, Type, Wand2 } from "lucide-react";
+import { Download,  PlusIcon } from "lucide-react";
 import { ModeToggle } from "@/components/global/mode-toggle";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Accordion } from "@/components/ui/accordion";
