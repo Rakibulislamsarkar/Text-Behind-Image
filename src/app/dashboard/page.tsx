@@ -179,7 +179,8 @@ export default function Page() {
       <div className="mx-auto max-w-7xl space-y-4">
         {/* Header - unchanged */}
         <div className="flex justify-between items-center">
-          <div className="flex flex-col space-y-2">
+          <div className="flex space-x-2">
+            <img src="/opal-logo.svg" alt="Opal Logo" className="w-[30px]"/>
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-b from-white to-zinc-500 inline-block text-transparent bg-clip-text">
               Opal
             </h1>

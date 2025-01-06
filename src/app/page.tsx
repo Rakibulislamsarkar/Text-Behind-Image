@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { InfiniteCarousel } from "@/components/global/Infinite-carousel"
 import { InfiniteCarousel2 } from "@/components/global/Infinite-carousel-2"
 import { useState } from "react"
+import Image from "next/image"
 
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false)
@@ -18,6 +19,7 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-2">
+              <Image src="/opal-logo.svg" width={30} height={30} alt="Opal Logo" />
               <span className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-b from-white to-zinc-500 inline-block text-transparent bg-clip-text">Opal</span>
             </div>
             <div className="hidden md:flex items-center gap-4">
