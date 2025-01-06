@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { ImageUploader } from "@/components/global/image-uploader";
 import { Button } from "@/components/ui/button";
 import TextCustomizer from "@/components/editor/text-customizer";
@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-import { Download,  PlusIcon } from "lucide-react";
+import { Download, PlusIcon } from "lucide-react";
 import { ModeToggle } from "@/components/global/mode-toggle";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Accordion } from "@/components/ui/accordion";
@@ -79,13 +79,17 @@ export default function Page() {
     setUploadedImage({ url, file });
   };
 
-  const handleAttributeChange = (id: number, attribute: string, value: any) => {
+  const handleAttributeChange = (
+    id: number,
+    attribute: string,
+    value: string | number
+  ) => {
     setTextSets((prev) =>
       prev.map((set) => (set.id === id ? { ...set, [attribute]: value } : set))
     );
   };
 
-  const renderCanvas = () => {
+  const renderCanvas = useCallback(() => {
     if (!uploadedImage || !previewCanvasRef.current) return;
 
     const canvas = previewCanvasRef.current;
@@ -144,7 +148,7 @@ export default function Page() {
     };
 
     img.src = uploadedImage.url;
-  };
+  }, [uploadedImage, textSets]);
 
   // Update canvas when image or text sets change
   useEffect(() => {
@@ -159,7 +163,7 @@ export default function Page() {
     return () => {
       observer.disconnect();
     };
-  }, [uploadedImage, textSets]);
+  }, [uploadedImage, textSets, renderCanvas]);
 
   const handleExport = (format: "png" | "jpeg") => {
     if (!previewCanvasRef.current) return;
@@ -232,18 +236,18 @@ export default function Page() {
         ) : (
           <div className="grid gap-4 lg:grid-cols-2">
             {/* Preview Section - Now comes first on mobile */}
-               <Card className="relative flex items-center justify-center rounded-lg border border-dashed border-muted-foreground/25 bg-muted overflow-hidden w-full">
-      <div className="w-full pb-[177.78%] md:pb-[56.25%]">
-        <canvas
-          ref={previewCanvasRef}
-          className="absolute top-0 left-0 w-full h-full"
-          style={{
-            objectFit: "contain",
-            objectPosition: "center",
-          }}
-        />
-      </div>
-    </Card>
+            <Card className="relative flex items-center justify-center rounded-lg border border-dashed border-muted-foreground/25 bg-muted overflow-hidden w-full">
+              <div className="w-full pb-[177.78%] md:pb-[56.25%]">
+                <canvas
+                  ref={previewCanvasRef}
+                  className="absolute top-0 left-0 w-full h-full"
+                  style={{
+                    objectFit: "contain",
+                    objectPosition: "center",
+                  }}
+                />
+              </div>
+            </Card>
 
             {/* Editor Section */}
             <div className="flex flex-col w-full">
@@ -260,7 +264,6 @@ export default function Page() {
                         handleAttributeChange={handleAttributeChange}
                         removeTextSet={removeTextSet}
                         duplicateTextSet={duplicateTextSet}
-                        userId="1"
                       />
                     ))}
                   </Accordion>

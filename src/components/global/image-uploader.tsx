@@ -10,7 +10,6 @@ interface ImageUploaderProps {
 }
 
 export function ImageUploader({ onUploadComplete }: ImageUploaderProps) {
-  const [isDragging, setIsDragging] = useState(false)
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0]

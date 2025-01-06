@@ -5,7 +5,7 @@ import {
 } from "@supabase/auth-helpers-react";
 import { Profile } from "@/types";
 
-import { useContext, createContext, useState, useEffect } from "react";
+import { useContext, createContext, useState, useEffect, ReactNode } from "react";
 
 type UserContextType = {
     accessToken: string | null;
@@ -19,10 +19,10 @@ export const UserContext = createContext<UserContextType | undefined>(
 );
 
 export interface Props {
-    [propName: string]: any;
+    children: ReactNode;
 }
 
-export const MyUserContextProvider = (props: Props) => {
+export const MyUserContextProvider = ({ children }: Props) => {
     const {
         session,
         isLoading: isLoadingUser,
@@ -53,7 +53,7 @@ export const MyUserContextProvider = (props: Props) => {
         } else if (!user && !isLoadingUser && !isLoadingData) {
             setUserDetails(null);
         }
-    }, [user, isLoadingUser])
+    }, [user, isLoadingUser, isLoadingData, userDetails, getUserDetails])
 
     const value = {
         accessToken,
@@ -62,7 +62,7 @@ export const MyUserContextProvider = (props: Props) => {
         isLoading: isLoadingUser || isLoadingData,
     }
 
-    return <UserContext.Provider value={value} {...props} />
+    return <UserContext.Provider value={value}>{children}</UserContext.Provider>
 };
 
 export const useUser = () => {
@@ -73,3 +73,4 @@ export const useUser = () => {
 
     return context;
 }
+

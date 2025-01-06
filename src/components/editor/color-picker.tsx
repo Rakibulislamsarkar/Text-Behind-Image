@@ -5,15 +5,15 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent } from '@/components/ui/dropdown-menu';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-// @ts-expect-error
-import { ChromePicker } from 'react-color';
+// @ts-expect-error: react-color types are not up to date
+import { ChromePicker, ColorResult } from 'react-color';
 import { colors } from '@/constants/color';
 
 interface ColorPickerProps {
   attribute: string;
   label: string;
   currentColor: string;
-  handleAttributeChange: (attribute: string, value: any) => void;
+  handleAttributeChange: (attribute: string, value: string) => void;
 } 
 
 const ColorPicker: React.FC<ColorPickerProps> = ({
@@ -51,7 +51,7 @@ const ColorPicker: React.FC<ColorPickerProps> = ({
               <TabsContent value='colorPicker'>
                 <ChromePicker
                   color={currentColor}
-                  onChange={(color: { hex: any; }) => handleAttributeChange(attribute, color.hex)}
+                  onChange={(color: ColorResult) => handleAttributeChange(attribute, color.hex)}
                 />
               </TabsContent>
               <TabsContent value='suggestions'> 
@@ -75,3 +75,4 @@ const ColorPicker: React.FC<ColorPickerProps> = ({
 };
 
 export default ColorPicker;
+

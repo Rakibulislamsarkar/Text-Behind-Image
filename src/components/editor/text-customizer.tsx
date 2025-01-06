@@ -12,33 +12,35 @@ import {
 import { Move, Text, Bold, RotateCw, Palette, LightbulbIcon, CaseSensitive, TypeIcon as TypeOutline } from 'lucide-react';
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
+
+type TextSet = {
+  id: number;
+  text: string;
+  fontFamily: string;
+  top: number;
+  left: number;
+  color: string;
+  fontSize: number;
+  fontWeight: number;
+  opacity: number;
+  rotation: number;
+  shadowColor: string;
+  shadowSize: number;
+};
+
 interface TextCustomizerProps {
-  textSet: {
-    id: number;
-    text: string;
-    fontFamily: string;
-    top: number;
-    left: number;
-    color: string;
-    fontSize: number;
-    fontWeight: number;
-    opacity: number;
-    rotation: number;
-    shadowColor: string;
-    shadowSize: number;
-  };
-  handleAttributeChange: (id: number, attribute: string, value: any) => void;
+  textSet: TextSet;
+  handleAttributeChange: (id: number, attribute: string, value: string | number) => void;
+  duplicateTextSet: (textSet: TextSet) => void;
   removeTextSet: (id: number) => void;
-  duplicateTextSet: (textSet: any) => void;
-  userId: string;
 }
+
 
 const TextCustomizer: React.FC<TextCustomizerProps> = ({
   textSet,
   handleAttributeChange,
   removeTextSet,
   duplicateTextSet,
-  userId,
 }) => {
   const [activeControl, setActiveControl] = useState<string | null>(null);
 
@@ -102,7 +104,6 @@ const TextCustomizer: React.FC<TextCustomizerProps> = ({
                 handleAttributeChange={(attribute, value) =>
                   handleAttributeChange(textSet.id, attribute, value)
                 }
-                userId={userId}
               />
             )}
 
@@ -218,7 +219,6 @@ const TextCustomizer: React.FC<TextCustomizerProps> = ({
             handleAttributeChange={(attribute, value) =>
               handleAttributeChange(textSet.id, attribute, value)
             }
-            userId={userId}
           />
           <div className="flex flex-row items-start justify-start gap-10 w-full max-w-full overflow-hidden">
             <ColorPicker
