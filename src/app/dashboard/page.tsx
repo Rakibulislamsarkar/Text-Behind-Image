@@ -1,280 +1,377 @@
-"use client";
+// app/app/page.tsx
+'use client'
 
-import { useState, useRef, useEffect, useCallback } from "react";
-import { ImageUploader } from "@/components/global/image-uploader";
-import { Button } from "@/components/ui/button";
-import TextCustomizer from "@/components/editor/text-customizer";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import React, { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 
-import { Download, PlusIcon } from "lucide-react";
-import { ModeToggle } from "@/components/global/mode-toggle";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Accordion } from "@/components/ui/accordion";
-import "@/app/fonts.css";
+import { useUser } from '@/hooks/useUser';
+import { useSessionContext, useSupabaseClient } from '@supabase/auth-helpers-react';
 
-interface UploadedImage {
-  url: string;
-  file: File;
-}
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from '@/components/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Separator } from '@/components/ui/separator';
+import { Accordion } from '@/components/ui/accordion';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { ModeToggle } from '@/components/global/mode-toggle';
+import { Profile } from '@/types';
+import TextCustomizer from '@/components/editor/text-customizer';
 
-interface TextSet {
-  id: number;
-  text: string;
-  fontFamily: string;
-  fontSize: number;
-  color: string;
-  top: number;
-  left: number;
-  opacity: number;
-  rotation: number;
-  fontWeight: number;
-  shadowColor: string;
-  shadowSize: number;
-}
+import { PlusIcon, ReloadIcon } from '@radix-ui/react-icons';
 
-export default function Page() {
-  const [uploadedImage, setUploadedImage] = useState<UploadedImage | null>(
-    null
-  );
-  const [textSets, setTextSets] = useState<TextSet[]>([]);
-  const previewCanvasRef = useRef<HTMLCanvasElement>(null);
+import { removeBackground } from "@imgly/background-removal";
 
-  const addNewTextSet = () => {
-    const newId = Math.max(...textSets.map((set) => set.id), 0) + 1;
-    setTextSets((prev) => [
-      ...prev,
-      {
-        id: newId,
-        text: "edit",
-        fontFamily: "Inter",
-        top: 0,
-        left: 0,
-        color: "white",
-        fontSize: 200,
-        fontWeight: 800,
-        opacity: 1,
-        shadowColor: "rgba(0, 0, 0, 0.8)",
-        shadowSize: 4,
-        rotation: 0,
-      },
-    ]);
-  };
+import RandomColorAd from '@/ads/randomcolor';
 
-  const removeTextSet = (id: number) => {
-    setTextSets((prev) => prev.filter((set) => set.id !== id));
-  };
+import '@/app/fonts.css';
 
-  const duplicateTextSet = (textSet: TextSet) => {
-    const newId = Math.max(...textSets.map((set) => set.id), 0) + 1;
-    setTextSets((prev) => [...prev, { ...textSet, id: newId }]);
-  };
+const Page = () => {
+    const { user } = useUser();
+    const { session } = useSessionContext();
+    const supabaseClient = useSupabaseClient();
+    const [currentUser, setCurrentUser] = useState<Profile>()
 
-  const handleImageUpload = (url: string, file: File) => {
-    setUploadedImage({ url, file });
-  };
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [isImageSetupDone, setIsImageSetupDone] = useState<boolean>(false);
+    const [removedBgImageUrl, setRemovedBgImageUrl] = useState<string | null>(null);
+    const [textSets, setTextSets] = useState<Array<any>>([]);
+    const [isPayDialogOpen, setIsPayDialogOpen] = useState<boolean>(false); 
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const handleAttributeChange = (
-    id: number,
-    attribute: string,
-    value: string | number
-  ) => {
-    setTextSets((prev) =>
-      prev.map((set) => (set.id === id ? { ...set, [attribute]: value } : set))
-    );
-  };
-
-  const renderCanvas = useCallback(() => {
-    if (!uploadedImage || !previewCanvasRef.current) return;
-
-    const canvas = previewCanvasRef.current;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-
-    img.onload = () => {
-      // Set canvas size to match image aspect ratio while fitting in container
-      const containerWidth = canvas.parentElement?.clientWidth || 800;
-      const scale = containerWidth / img.width;
-      canvas.width = containerWidth;
-      canvas.height = img.height * scale;
-
-      // Clear canvas and draw image
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-      // Draw each text set
-      textSets.forEach((textSet) => {
-        ctx.save();
-
-        // Set text properties
+    const getCurrentUser = async (userId: string) => {
         try {
-          ctx.font = `${textSet.fontWeight} ${textSet.fontSize}px "${textSet.fontFamily}"`;
-        } catch (e) {
-          console.error("Font error:", e);
-          ctx.font = `${textSet.fontWeight} ${textSet.fontSize}px Arial`;
+            const { data: profile, error } = await supabaseClient
+                .from('profiles')
+                .select('*')
+                .eq('id', userId)
+
+            if (error) {
+                throw error;
+            }
+
+            if (profile) {
+                setCurrentUser(profile[0]);
+            }
+        } catch (error) {
+            console.error('Error fetching user profile:', error);
         }
-
-        ctx.fillStyle = textSet.color;
-        ctx.globalAlpha = textSet.opacity;
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-
-        // Calculate position
-        const x = (canvas.width * (textSet.left + 50)) / 100;
-        const y = (canvas.height * (50 - textSet.top)) / 100;
-
-        // Apply transformations
-        ctx.translate(x, y);
-        ctx.rotate((textSet.rotation * Math.PI) / 180);
-
-        // Add shadow if specified
-        if (textSet.shadowColor && textSet.shadowSize) {
-          ctx.shadowColor = textSet.shadowColor;
-          ctx.shadowBlur = textSet.shadowSize;
-        }
-
-        // Draw text
-        ctx.fillText(textSet.text, 0, 0);
-        ctx.restore();
-      });
     };
 
-    img.src = uploadedImage.url;
-  }, [uploadedImage, textSets]);
-
-  // Update canvas when image or text sets change
-  useEffect(() => {
-    renderCanvas();
-
-    // Add resize observer to handle container size changes
-    const observer = new ResizeObserver(() => renderCanvas());
-    if (previewCanvasRef.current?.parentElement) {
-      observer.observe(previewCanvasRef.current.parentElement);
-    }
-
-    return () => {
-      observer.disconnect();
+    const handleUploadImage = () => {
+        if (currentUser && (currentUser.images_generated < 2 || currentUser.paid)) {
+            if (fileInputRef.current) {
+                fileInputRef.current.click();
+            }
+        } else {
+            alert("You have reached the limit of free generations.");
+            setIsPayDialogOpen(true);
+        }
     };
-  }, [uploadedImage, textSets, renderCanvas]);
 
-  const handleExport = (format: "png" | "jpeg") => {
-    if (!previewCanvasRef.current) return;
+    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            const imageUrl = URL.createObjectURL(file);
+            setSelectedImage(imageUrl);
+            await setupImage(imageUrl);
+        }
+    };
 
-    const link = document.createElement("a");
-    link.download = `image-with-text.${format}`;
-    link.href = previewCanvasRef.current.toDataURL(`image/${format}`);
-    link.click();
-  };
+    const setupImage = async (imageUrl: string) => {
+        try {
+            const imageBlob = await removeBackground(imageUrl);
+            const url = URL.createObjectURL(imageBlob);
+            setRemovedBgImageUrl(url);
+            setIsImageSetupDone(true);
 
-  return (
-    <div className="min-h-screen p-6">
-      <div className="mx-auto max-w-7xl space-y-4">
-        {/* Header - unchanged */}
-        <div className="flex justify-between items-center">
-          <div className="flex space-x-2">
-            <img src="/opal-logo.svg" alt="Opal Logo" className="w-[30px]"/>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-b from-white to-zinc-500 inline-block text-transparent bg-clip-text">
-              Opal
-            </h1>
-          </div>
-          <div className="flex items-center gap-2">
-            {uploadedImage && (
-              <>
-                <Button
-                  variant="outline"
-                  onClick={() =>
-                    document.getElementById("file-upload")?.click()
-                  }
-                >
-                  <input
-                    type="file"
-                    id="file-upload"
-                    className="hidden"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        const url = URL.createObjectURL(file);
-                        handleImageUpload(url, file);
-                      }
-                    }}
-                  />
-                  Upload Image
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => handleExport("png")}
-                >
-                  <Download className="h-4 w-4" />
-                </Button>
-              </>
-            )}
-            <ModeToggle />
-          </div>
-        </div>
+            if (currentUser) {
+                await supabaseClient
+                    .from('profiles')
+                    .update({ images_generated: currentUser.images_generated + 1 })
+                    .eq('id', currentUser.id) 
+                    .select();
+            }
+            
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
-        {!uploadedImage ? (
-          <Card>
-            <CardHeader>
-              <CardTitle>Upload Image</CardTitle>
-              <CardDescription>
-                Choose an image to add text overlay
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ImageUploader onUploadComplete={handleImageUpload} />
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid gap-4 lg:grid-cols-2">
-            {/* Preview Section - Now comes first on mobile */}
-            <Card className="relative flex items-center justify-center rounded-lg border border-dashed border-muted-foreground/25 bg-muted overflow-hidden w-full">
-              <div className="w-full pb-[177.78%] md:pb-[56.25%]">
-                <canvas
-                  ref={previewCanvasRef}
-                  className="absolute top-0 left-0 w-full h-full"
-                  style={{
-                    objectFit: "contain",
-                    objectPosition: "center",
-                  }}
-                />
-              </div>
-            </Card>
+    const addNewTextSet = () => {
+        const newId = Math.max(...textSets.map(set => set.id), 0) + 1;
+        setTextSets(prev => [...prev, {
+            id: newId,
+            text: 'edit',
+            fontFamily: 'Inter',
+            top: 0,
+            left: 0,
+            color: 'white',
+            fontSize: 200,
+            fontWeight: 800,
+            opacity: 1,
+            shadowColor: 'rgba(0, 0, 0, 0.8)',
+            shadowSize: 4,
+            rotation: 0
+        }]);
+    };
 
-            {/* Editor Section */}
-            <div className="flex flex-col w-full">
-              <Button variant="secondary" onClick={addNewTextSet}>
-                <PlusIcon className="mr-2" /> Add New Text Set
-              </Button>
-              <ScrollArea className="h-[calc(100vh-10rem)] p-2">
-                <div className="pr-4">
-                  <Accordion type="single" collapsible className="w-full mt-2">
-                    {textSets.map((textSet) => (
-                      <TextCustomizer
-                        key={textSet.id}
-                        textSet={textSet}
-                        handleAttributeChange={handleAttributeChange}
-                        removeTextSet={removeTextSet}
-                        duplicateTextSet={duplicateTextSet}
-                      />
-                    ))}
-                  </Accordion>
+    const handleAttributeChange = (id: number, attribute: string, value: any) => {
+        setTextSets(prev => prev.map(set => 
+            set.id === id ? { ...set, [attribute]: value } : set
+        ));
+    };
+
+    const duplicateTextSet = (textSet: any) => {
+        const newId = Math.max(...textSets.map(set => set.id), 0) + 1;
+        setTextSets(prev => [...prev, { ...textSet, id: newId }]);
+    };
+
+    const removeTextSet = (id: number) => {
+        setTextSets(prev => prev.filter(set => set.id !== id));
+    };
+
+    const saveCompositeImage = () => {
+        if (!canvasRef.current || !isImageSetupDone) return;
+    
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+    
+        const bgImg = new (window as any).Image();
+        bgImg.crossOrigin = "anonymous";
+        bgImg.onload = () => {
+            canvas.width = bgImg.width;
+            canvas.height = bgImg.height;
+    
+            ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
+    
+            textSets.forEach(textSet => {
+                ctx.save(); // Save the current state
+                ctx.font = `${textSet.fontWeight} ${textSet.fontSize * 3}px ${textSet.fontFamily}`;
+                ctx.fillStyle = textSet.color;
+                ctx.globalAlpha = textSet.opacity;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+    
+                const x = canvas.width * (textSet.left + 50) / 100;
+                const y = canvas.height * (50 - textSet.top) / 100;
+    
+                // Move the context to the text position and rotate
+                ctx.translate(x, y);
+                ctx.rotate((textSet.rotation * Math.PI) / 180); // Convert degrees to radians
+                ctx.fillText(textSet.text, 0, 0); // Draw text at the origin (0, 0)
+                ctx.restore(); // Restore the original state
+            });
+    
+            if (removedBgImageUrl) {
+                const removedBgImg = new (window as any).Image();
+                removedBgImg.crossOrigin = "anonymous";
+                removedBgImg.onload = () => {
+                    ctx.drawImage(removedBgImg, 0, 0, canvas.width, canvas.height);
+                    triggerDownload();
+                };
+                removedBgImg.src = removedBgImageUrl;
+            } else {
+                triggerDownload();
+            }
+        };
+        bgImg.src = selectedImage || '';
+    
+        function triggerDownload() {
+            const dataUrl = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.download = 'text-behind-image.png';
+            link.href = dataUrl;
+            link.click();
+        }
+    };
+
+    useEffect(() => {
+      if (user?.id) {
+        getCurrentUser(user.id)
+      }
+    }, [user])
+    
+    return (
+        <>
+            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1609710199882100" crossOrigin="anonymous"></script>
+            {user && session && session.user && currentUser ? (
+                <div className='flex flex-col h-screen'>
+                    <div className="ml-6">
+                        <RandomColorAd />
+                    </div>
+                    <header className='flex flex-row items-center justify-between p-5 px-10'>
+                        <h2 className="text-4xl md:text-2xl font-semibold tracking-tight">
+                            <span className="block md:hidden">TBI</span>
+                            <span className="hidden md:block">Text behind image editor</span>
+                        </h2>
+                        <div className='flex gap-4 items-center'>
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                style={{ display: 'none' }}
+                                onChange={handleFileChange}
+                                accept=".jpg, .jpeg, .png"
+                            />
+                            <div className='flex items-center gap-5'>
+                                <div className='hidden md:block font-semibold'>
+                                    {currentUser.paid ? (
+                                        <p className='text-sm'>
+                                            Unlimited generations
+                                        </p>
+                                    ) : (
+                                        <div className='flex items-center gap-2'>
+                                            <p className='text-sm'>
+                                                {2 - (currentUser.images_generated)} generations left
+                                            </p>
+                                            <Button 
+                                                variant="link" 
+                                                className="p-0 h-auto text-sm text-primary hover:underline"
+                                                onClick={() => setIsPayDialogOpen(true)}
+                                            >
+                                                Upgrade
+                                            </Button>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className='flex gap-2'>
+                                    <Button onClick={handleUploadImage}>
+                                        Upload image
+                                    </Button>
+                                    {selectedImage && (
+                                        <Button onClick={saveCompositeImage} className='hidden md:flex'>
+                                            Save image
+                                        </Button>
+                                    )}
+                                </div>
+                            </div>
+                            <ModeToggle />
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Avatar className="cursor-pointer">
+                                        <AvatarImage src={currentUser?.avatar_url} /> 
+                                        <AvatarFallback>TBI</AvatarFallback>
+                                    </Avatar>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent className="w-56" align="end">
+                                    <DropdownMenuLabel>
+                                        <div className="flex flex-col space-y-1">
+                                            <p className="text-sm font-medium leading-none">{currentUser?.full_name}</p>
+                                            <p className="text-xs leading-none text-muted-foreground">{user?.user_metadata.email}</p>
+                                        </div>
+                                    </DropdownMenuLabel>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem onClick={() => setIsPayDialogOpen(true)}>
+                                        <button>{currentUser?.paid ? 'View Plan' : 'Upgrade to Pro'}</button>
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
+                    </header>
+                    <Separator /> 
+                    {selectedImage ? (
+                        <div className='flex flex-col md:flex-row items-start justify-start gap-10 w-full h-screen px-10 mt-2'>
+                            <div className="flex flex-col items-start justify-start w-full md:w-1/2 gap-4">
+                                <canvas ref={canvasRef} style={{ display: 'none' }} />
+                                <div className='flex items-center gap-2'>
+                                    <Button onClick={saveCompositeImage} className='md:hidden'>
+                                        Save image
+                                    </Button>
+                                    <div className='block md:hidden'>
+                                        {currentUser.paid ? (
+                                            <p className='text-sm'>
+                                                Unlimited generations
+                                            </p>
+                                        ) : (
+                                            <div className='flex items-center gap-5'>
+                                                <p className='text-sm'>
+                                                    {2 - (currentUser.images_generated)} generations left
+                                                </p>
+                                                <Button 
+                                                    variant="link" 
+                                                    className="p-0 h-auto text-sm text-primary hover:underline"
+                                                    onClick={() => setIsPayDialogOpen(true)}
+                                                >
+                                                    Upgrade
+                                                </Button>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="min-h-[400px] w-[80%] p-4 border border-border rounded-lg relative overflow-hidden">
+                                    {isImageSetupDone ? (
+                                        <Image
+                                            src={selectedImage} 
+                                            alt="Uploaded"
+                                            layout="fill"
+                                            objectFit="contain" 
+                                            objectPosition="center" 
+                                        />
+                                    ) : (
+                                        <span className='flex items-center w-full gap-2'><ReloadIcon className='animate-spin' /> Loading, please wait</span>
+                                    )}
+                                    {isImageSetupDone && textSets.map(textSet => (
+                                        <div
+                                            key={textSet.id}
+                                            style={{
+                                                position: 'absolute',
+                                                top: `${50 - textSet.top}%`,
+                                                left: `${textSet.left + 50}%`,
+                                                transform: `translate(-50%, -50%) rotate(${textSet.rotation}deg)`,
+                                                color: textSet.color,
+                                                textAlign: 'center',
+                                                fontSize: `${textSet.fontSize}px`,
+                                                fontWeight: textSet.fontWeight,
+                                                fontFamily: textSet.fontFamily,
+                                                opacity: textSet.opacity
+                                            }}
+                                        >
+                                            {textSet.text}
+                                        </div>
+                                    ))}
+                                    {removedBgImageUrl && (
+                                        <Image
+                                            src={removedBgImageUrl}
+                                            alt="Removed bg"
+                                            layout="fill"
+                                            objectFit="contain" 
+                                            objectPosition="center" 
+                                            className="absolute top-0 left-0 w-full h-full"
+                                        /> 
+                                    )}
+                                </div>
+                            </div>
+                            <div className='flex flex-col w-full md:w-1/2'>
+                                <Button variant={'secondary'} onClick={addNewTextSet}><PlusIcon className='mr-2'/> Add New Text Set</Button>
+                                <ScrollArea className="h-[calc(100vh-10rem)] p-2">
+                                    <Accordion type="single" collapsible className="w-full mt-2">
+                                        {textSets.map(textSet => (
+                                            <TextCustomizer 
+                                                key={textSet.id}
+                                                textSet={textSet}
+                                                handleAttributeChange={handleAttributeChange}
+                                                removeTextSet={removeTextSet}
+                                                duplicateTextSet={duplicateTextSet}
+                                            />
+                                        ))}
+                                    </Accordion>
+                                </ScrollArea>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className='flex items-center justify-center min-h-screen w-full'>
+                            <h2 className="text-xl font-semibold">Welcome, get started by uploading an image!</h2>
+                        </div>
+                    )} 
                 </div>
-                <ScrollBar orientation="vertical" />
-              </ScrollArea>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+            ) : (
+
+                <div className='flex items-center justify-center min-h-screen w-full'>
+                    <h2 className="text-xl font-semibold">Loading...</h2>
+                    </div>)}
+        </>
+    );
 }
+
+export default Page;

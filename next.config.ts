@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -14,6 +15,8 @@ const nextConfig = {
         fs: false,
         path: false,
         crypto: false,
+        'onnxruntime-web/webgpu': false
+
       };
     }
 
