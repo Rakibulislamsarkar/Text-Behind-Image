@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import * as React from "react";
 import {
@@ -14,10 +14,10 @@ interface CardItem {
 }
 
 const CARD_ITEMS: CardItem[] = [
-  { imagePath: "/bear.png" },
-  { imagePath: "/go.png" },
-  { imagePath: "/goats.png" },
-  { imagePath: "/enjoy.png" },
+  { imagePath: "/life.png" },
+  { imagePath: "/pov.png" },
+  { imagePath: "/ride.png" },
+  { imagePath: "/pressure.png" },
 ];
 
 function FeatureCard({ imagePath }: { imagePath: string }) {
@@ -31,15 +31,18 @@ function FeatureCard({ imagePath }: { imagePath: string }) {
   );
 }
 
-export function InfiniteCarousel() {
-  const [isMobile, setIsMobile] = React.useState(window.innerWidth < 768);
+export function InfiniteCarousel2() {
+  const [isMobile, setIsMobile] = React.useState(false);
 
   React.useEffect(() => {
+    // Check if window is available (for SSR safety) and set initial state
     function handleResize() {
       setIsMobile(window.innerWidth < 768);
     }
 
+    handleResize(); // Set initial state after mount
     window.addEventListener("resize", handleResize);
+
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 

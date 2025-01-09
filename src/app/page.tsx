@@ -31,7 +31,11 @@ export default function Home() {
               </span>
             </div>
             <div className="hidden md:flex items-center gap-4">
-              <Button variant="secondary">Login</Button>
+              <Button variant="secondary">
+                <Link href="/dashboard">
+                  Try Opal
+                </Link>
+              </Button>
             </div>
             <Button
               variant="ghost"
@@ -56,10 +60,9 @@ export default function Home() {
             >
               <div className="space-y-2 px-4 py-4">
                 <Button variant="secondary" className="w-full justify-center">
-                  Login
-                </Button>
-                <Button variant="ghost" className="w-full justify-center">
-                  Sign Up
+                  <Link href="/dashboard">
+                    Try Opal
+                  </Link>
                 </Button>
               </div>
             </motion.div>

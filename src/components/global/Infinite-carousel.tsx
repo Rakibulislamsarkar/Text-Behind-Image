@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import * as React from "react";
 import {
@@ -14,10 +14,10 @@ interface CardItem {
 }
 
 const CARD_ITEMS: CardItem[] = [
-  { imagePath: "/life.png" },
-  { imagePath: "/pov.png" },
-  { imagePath: "/ride.png" },
-  { imagePath: "/pressure.png" },
+  { imagePath: "/bear.png" },
+  { imagePath: "/go.png" },
+  { imagePath: "/goats.png" },
+  { imagePath: "/enjoy.png" },
 ];
 
 function FeatureCard({ imagePath }: { imagePath: string }) {
@@ -31,15 +31,18 @@ function FeatureCard({ imagePath }: { imagePath: string }) {
   );
 }
 
-export function InfiniteCarousel2() {
-  const [isMobile, setIsMobile] = React.useState(window.innerWidth < 768);
+export function InfiniteCarousel() {
+  const [isMobile, setIsMobile] = React.useState(false);
 
   React.useEffect(() => {
-    function handleResize() {
+    // Initialize isMobile safely after mounting
+    const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
-    }
+    };
 
+    handleResize(); // Set initial state
     window.addEventListener("resize", handleResize);
+
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
