@@ -103,21 +103,29 @@ const Page = () => {
     setTextSets((prev) => prev.filter((set) => set.id !== id));
   };
 
+  const createImageInstance = () => {
+    if (typeof window !== "undefined") {
+      return new window.Image();
+    }
+    throw new Error("Cannot create image instance on the server.");
+  };
+  
+
   const saveCompositeImage = () => {
     if (!canvasRef.current || !isImageSetupDone) return;
-
+  
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-
-    const bgImg = new window.Image();
+  
+    const bgImg = createImageInstance();
     bgImg.crossOrigin = "anonymous";
     bgImg.onload = () => {
       canvas.width = bgImg.width;
       canvas.height = bgImg.height;
-
+  
       ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
-
+  
       textSets.forEach((textSet) => {
         ctx.save();
         ctx.font = `${textSet.fontWeight} ${textSet.fontSize * 3}px ${
@@ -127,18 +135,18 @@ const Page = () => {
         ctx.globalAlpha = textSet.opacity;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-
+  
         const x = (canvas.width * (textSet.left + 50)) / 100;
         const y = (canvas.height * (50 - textSet.top)) / 100;
-
+  
         ctx.translate(x, y);
         ctx.rotate((textSet.rotation * Math.PI) / 180);
         ctx.fillText(textSet.text, 0, 0);
         ctx.restore();
       });
-
+  
       if (removedBgImageUrl) {
-        const removedBgImg = new window.Image();
+        const removedBgImg = createImageInstance();
         removedBgImg.crossOrigin = "anonymous";
         removedBgImg.onload = () => {
           ctx.drawImage(removedBgImg, 0, 0, canvas.width, canvas.height);
@@ -150,7 +158,7 @@ const Page = () => {
       }
     };
     bgImg.src = selectedImage || "";
-
+  
     function triggerDownload() {
       const dataUrl = canvas.toDataURL("image/png");
       const link = document.createElement("a");
@@ -159,6 +167,7 @@ const Page = () => {
       link.click();
     }
   };
+  
 
   return (
     <div className="flex flex-col h-screen">
