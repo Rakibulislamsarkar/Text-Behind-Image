@@ -267,7 +267,7 @@ const Page = () => {
               alt="Upload Illustration"
             />
             <ImageUploader
-              onUploadComplete={(url, file) => {
+              onUploadComplete={(url) => {
                 setSelectedImage(url);
                 setupImage(url);
               }}
