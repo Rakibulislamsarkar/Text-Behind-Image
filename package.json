@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@imgly/background-removal": "^1.5.7",
+    "@imgly/background-removal": "1.5.5",
     "@imgly/background-removal-node": "^1.4.5",
     "@next/font": "^14.2.15",
     "@radix-ui/react-accordion": "^1.2.2",
