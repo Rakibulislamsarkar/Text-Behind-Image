@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/card";
 
 import "@/app/fonts.css";
+import { SaveIcon, UploadIcon } from "lucide-react";
 
 const Page = () => {
   const supabaseClient = useSupabaseClient();
@@ -197,7 +198,15 @@ const Page = () => {
       <div className="flex flex-col h-screen">
         <header className="flex flex-row items-center justify-between p-5 px-10">
           <h2 className="text-4xl md:text-2xl font-semibold tracking-tight">
-            <span className="block md:hidden">Veil</span>
+            <span className="block md:hidden">
+              <Image
+                src="/opal-logo.svg"
+                width={30}
+                height={30}
+                alt="veil Logo"
+                priority
+              />
+            </span>
             <span className="hidden md:block">Veil</span>
           </h2>
           <div className="flex gap-4 items-center">
@@ -210,13 +219,16 @@ const Page = () => {
             />
             <div className="flex items-center gap-5">
               <div className="flex gap-2">
-                <Button onClick={handleUploadImage}>Upload image</Button>
+                <Button onClick={handleUploadImage}>
+                  <span className="block md:hidden"><UploadIcon /></span>
+                  <span className="hidden md:block">Upload Image</span>
+                </Button>
                 {selectedImage && (
                   <Button
                     onClick={saveCompositeImage}
-                    className="hidden md:flex"
                   >
-                    Save image
+                    <span className="block md:hidden"><SaveIcon /></span>
+                    <span className="hidden md:block">Save</span>
                   </Button>
                 )}
               </div>
@@ -230,9 +242,6 @@ const Page = () => {
             <div className="flex flex-col items-start justify-start w-full md:w-1/2 gap-4">
               <canvas ref={canvasRef} style={{ display: "none" }} />
               <div className="flex items-center gap-2">
-                <Button onClick={saveCompositeImage} className="md:hidden">
-                  Save image
-                </Button>
               </div>
               <div className="min-h-[400px] w-[80%] p-4 border border-border rounded-lg relative overflow-hidden">
                 {isImageSetupDone ? (

@@ -58,7 +58,7 @@ export default function Home() {
             >
               <div className="space-y-2 px-4 py-4">
                 <Button variant="secondary" className="w-full justify-center">
-                  <Link href="/dashboard">Try veil</Link>
+                  <Link href="/dashboard">Try Veil</Link>
                 </Button>
               </div>
             </motion.div>
