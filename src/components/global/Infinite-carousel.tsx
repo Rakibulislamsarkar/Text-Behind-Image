@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import {
   Carousel,
   CarouselContent,
@@ -11,21 +12,27 @@ import {
 
 interface CardItem {
   imagePath: string;
+  alt: string;
 }
 
 const CARD_ITEMS: CardItem[] = [
-  { imagePath: "/bear.png" },
-  { imagePath: "/go.png" },
-  { imagePath: "/goats.png" },
-  { imagePath: "/enjoy.png" },
+  { imagePath: "/bear.png", alt: "Bear" },
+  { imagePath: "/go.png", alt: "Go" },
+  { imagePath: "/goats.png", alt: "Goats" },
+  { imagePath: "/enjoy.png", alt: "Enjoy" },
 ];
 
-function FeatureCard({ imagePath }: { imagePath: string }) {
+function FeatureCard({ imagePath, alt }: CardItem) {
   return (
     <div className="relative overflow-hidden min-h-[500px] group rounded-lg">
-      <div
-        className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110 rounded-lg"
-        style={{ backgroundImage: `url(${imagePath})` }}
+      <Image
+        src={imagePath}
+        alt={alt}
+        layout="fill"
+        objectFit="cover"
+        className="transition-transform duration-500 group-hover:scale-110 rounded-lg"
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        priority={alt === "Bear"} // Example: prioritize the first image
       />
     </div>
   );
@@ -35,7 +42,6 @@ export function InfiniteCarousel() {
   const [isMobile, setIsMobile] = React.useState(false);
 
   React.useEffect(() => {
-    // Initialize isMobile safely after mounting
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
     };
@@ -50,7 +56,7 @@ export function InfiniteCarousel() {
     return (
       <div className="w-full min-h-screen p-4 space-y-4">
         {CARD_ITEMS.map((item, index) => (
-          <FeatureCard key={index} imagePath={item.imagePath} />
+          <FeatureCard key={index} {...item} />
         ))}
       </div>
     );
@@ -66,7 +72,7 @@ export function InfiniteCarousel() {
                 key={index}
                 className="pl-4 md:basis-1/2 lg:basis-1/3"
               >
-                <FeatureCard imagePath={item.imagePath} />
+                <FeatureCard {...item} />
               </CarouselItem>
             ))}
           </CarouselContent>

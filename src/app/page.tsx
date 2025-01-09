@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { MenuIcon, ArrowUpRight } from "lucide-react";
+import { MenuIcon, ArrowUpRight, Github } from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { InfiniteCarousel } from "@/components/global/Infinite-carousel";
@@ -23,18 +23,16 @@ export default function Home() {
                 src="/opal-logo.svg" // this file exists in the public folder.
                 width={30}
                 height={30}
-                alt="Opal Logo"
+                alt="veil Logo"
                 priority
               />
               <span className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-b from-white to-zinc-500 inline-block text-transparent bg-clip-text">
-                Opal
+                Veil
               </span>
             </div>
             <div className="hidden md:flex items-center gap-4">
               <Button variant="secondary">
-                <Link href="/dashboard">
-                  Try Opal
-                </Link>
+                <Link href="/dashboard">Try veil</Link>
               </Button>
             </div>
             <Button
@@ -60,9 +58,7 @@ export default function Home() {
             >
               <div className="space-y-2 px-4 py-4">
                 <Button variant="secondary" className="w-full justify-center">
-                  <Link href="/dashboard">
-                    Try Opal
-                  </Link>
+                  <Link href="/dashboard">Try veil</Link>
                 </Button>
               </div>
             </motion.div>
@@ -104,7 +100,7 @@ export default function Home() {
           <InfiniteCarousel2 />
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <p className="text-base md:text-2xl lg:text-[23.97px] text-gray-400 mt-10 mb-10">
-              Opal uses advanced AI to effortlessly place text behind any image,
+              veil uses advanced AI to effortlessly place text behind any image,
               creating visually stunning designs and empowering creators and
               businesses to craft captivating visuals with ease.
             </p>
@@ -153,7 +149,7 @@ export default function Home() {
                     asChild
                   >
                     <Link href="/dashboard">
-                      Try Opal
+                      Try veil
                       <ArrowUpRight className="ml-2" size={18} />
                     </Link>
                   </Button>
@@ -162,6 +158,49 @@ export default function Home() {
             </motion.div>
           </div>
         </section>
+
+        {/* Footer */}
+        <div>
+          <div className="flex flex-col lg:flex-row justify-between  py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+            <div className="text-left">
+              <h1 className="text-4xl lg:text-5xl xl:text-5xl tracking-tight font-medium bg-gradient-to-b from-white to-zinc-500 text-transparent bg-clip-text">
+                Veil is Open Source
+              </h1>
+              <p className="text-lg text-gray-400 mt-5 mb-8 leading-6">
+                100% of the code of the app is public on Github - check it out
+                and contribute!
+              </p>
+            </div>
+            <div className="mt-6 lg:mt-0">
+              <Button
+                className="rounded-full bg-white text-black hover:bg-gray-200"
+                size="lg"
+                asChild
+              >
+                <Link href="/dashboard" className="flex items-center">
+                  Github
+                  <Github className="ml-2" size={18} />
+                </Link>
+              </Button>
+            </div>
+          </div>
+
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
+            <div className="text-center text-gray-400">
+              <p>
+                &copy; 2025 Veil. All rights reserved.{" "}
+                <a
+                  href="https://www.linkedin.com/in/rakibul-islam-sarkar-356aa5256/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white hover:text-gray-400"
+                >
+                  Rakibul Islam Sarkar
+                </a>
+              </p>
+            </div>
+          </div>
+        </div>
       </main>
     </div>
   );

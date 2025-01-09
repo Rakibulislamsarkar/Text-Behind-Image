@@ -197,8 +197,8 @@ const Page = () => {
       <div className="flex flex-col h-screen">
         <header className="flex flex-row items-center justify-between p-5 px-10">
           <h2 className="text-4xl md:text-2xl font-semibold tracking-tight">
-            <span className="block md:hidden">Opal</span>
-            <span className="hidden md:block">Opal</span>
+            <span className="block md:hidden">Veil</span>
+            <span className="hidden md:block">Veil</span>
           </h2>
           <div className="flex gap-4 items-center">
             <input
@@ -304,7 +304,7 @@ const Page = () => {
             <Card className="w-full max-w-md">
               <CardHeader>
                 <CardTitle className="text-2xl font-bold text-center">
-                  Welcome to Opal
+                  Welcome to Veil
                 </CardTitle>
                 <CardDescription className="text-center">
                   Get started by uploading an image to begin editing
