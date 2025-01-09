@@ -14,13 +14,28 @@ import {ImageUploader} from '@/components/global/image-uploader'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import "@/app/fonts.css";
 
+interface TextSet {
+  id: number;
+  text: string;
+  fontFamily: string;
+  top: number;
+  left: number;
+  color: string;
+  fontSize: number;
+  fontWeight: number;
+  opacity: number;
+  shadowColor: string;
+  shadowSize: number;
+  rotation: number;
+}
+
 const Page = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isImageSetupDone, setIsImageSetupDone] = useState<boolean>(false);
   const [removedBgImageUrl, setRemovedBgImageUrl] = useState<string | null>(
     null
   );
-  const [textSets, setTextSets] = useState<Array<any>>([]);
+  const [textSets, setTextSets] = useState<Array<TextSet>>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -79,7 +94,7 @@ const Page = () => {
     );
   };
 
-  const duplicateTextSet = (textSet: any) => {
+  const duplicateTextSet = (textSet: TextSet) => {
     const newId = Math.max(...textSets.map((set) => set.id), 0) + 1;
     setTextSets((prev) => [...prev, { ...textSet, id: newId }]);
   };
@@ -95,7 +110,7 @@ const Page = () => {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const bgImg = new (window as any).Image();
+    const bgImg = new window.Image();
     bgImg.crossOrigin = "anonymous";
     bgImg.onload = () => {
       canvas.width = bgImg.width;
@@ -123,7 +138,7 @@ const Page = () => {
       });
 
       if (removedBgImageUrl) {
-        const removedBgImg = new (window as any).Image();
+        const removedBgImg = new window.Image();
         removedBgImg.crossOrigin = "anonymous";
         removedBgImg.onload = () => {
           ctx.drawImage(removedBgImg, 0, 0, canvas.width, canvas.height);
