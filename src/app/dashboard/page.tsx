@@ -1,7 +1,6 @@
-// app/app/page.tsx
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import Image from "next/image";
 
 import {
@@ -9,16 +8,8 @@ import {
   useSupabaseClient,
 } from "@supabase/auth-helpers-react";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
 import { Separator } from "@/components/ui/separator";
 import { Accordion } from "@/components/ui/accordion";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -29,13 +20,17 @@ import TextCustomizer from "@/components/editor/text-customizer";
 import { PlusIcon, ReloadIcon } from "@radix-ui/react-icons";
 
 import { removeBackground } from "@imgly/background-removal";
-
-import RandomColorAd from "@/ads/randomcolor";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 import "@/app/fonts.css";
 
 const Page = () => {
-  const { session } = useSessionContext();
   const supabaseClient = useSupabaseClient();
   const [currentUser, setCurrentUser] = useState<Profile>();
 
@@ -45,7 +40,6 @@ const Page = () => {
     null
   );
   const [textSets, setTextSets] = useState<Array<any>>([]);
-  const [isPayDialogOpen, setIsPayDialogOpen] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -69,13 +63,8 @@ const Page = () => {
   };
 
   const handleUploadImage = () => {
-    if (currentUser && (currentUser.images_generated < 2 || currentUser.paid)) {
-      if (fileInputRef.current) {
-        fileInputRef.current.click();
-      }
-    } else {
-      alert("You have reached the limit of free generations.");
-      setIsPayDialogOpen(true);
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
     }
   };
 
@@ -205,12 +194,6 @@ const Page = () => {
 
   return (
     <>
-      <script
-        async
-        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1609710199882100"
-        crossOrigin="anonymous"
-      ></script>
-
       <div className="flex flex-col h-screen">
         <header className="flex flex-row items-center justify-between p-5 px-10">
           <h2 className="text-4xl md:text-2xl font-semibold tracking-tight">
@@ -317,10 +300,25 @@ const Page = () => {
             </div>
           </div>
         ) : (
-          <div className="flex items-center justify-center min-h-screen w-full">
-            <h1 className="text-4xl lg:text-5xl xl:text-5xl tracking-tight font-medium p-5 bg-gradient-to-b from-white to-zinc-500 inline-block text-transparent bg-clip-text">
-              Welcome, get started by uploading an image!
-            </h1>
+          <div className="flex items-center justify-center flex-grow p-8">
+            <Card className="w-full max-w-md">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold text-center">
+                  Welcome to Opal
+                </CardTitle>
+                <CardDescription className="text-center">
+                  Get started by uploading an image to begin editing
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-col items-center space-y-4">
+                <Image
+                  src="/bear.png"
+                  width={200}
+                  height={200}
+                  alt="Upload Illustration"
+                />
+              </CardContent>
+            </Card>
           </div>
         )}
       </div>
