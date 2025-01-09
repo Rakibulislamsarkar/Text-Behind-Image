@@ -14,16 +14,17 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[#080808] text-white relative">
-      {/* Navigation - Fixed with proper z-index and blur */}
-      <nav className="fixed top-0 left-0 right-0 z-50  backdrop-blur-lg">
+      {/* Navigation */}
+      <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-lg">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-2">
               <Image
-                src="/opal-logo.svg"
+                src="/opal-logo.svg" // this file exists in the public folder.
                 width={30}
                 height={30}
                 alt="Opal Logo"
+                priority
               />
               <span className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-b from-white to-zinc-500 inline-block text-transparent bg-clip-text">
                 Opal
@@ -43,7 +44,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Mobile menu with AnimatePresence for proper animation handling */}
+        {/* Mobile menu */}
         <AnimatePresence>
           {menuOpen && (
             <motion.div
@@ -66,9 +67,8 @@ export default function Home() {
         </AnimatePresence>
       </nav>
 
-      {/* Main Content - Proper spacing from fixed nav */}
+      {/* Main Content */}
       <main className="relative pt-16">
-        {/* Hero Section - Better responsive spacing */}
         <section className="relative pt-32 pb-24 overflow-hidden">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <motion.div
@@ -96,12 +96,11 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Feature Grid - Better structure and spacing */}
         <section>
           <InfiniteCarousel />
           <InfiniteCarousel2 />
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <p className="text-base md:text-2xl lg:text-[23.97px] md:tracking-[-0.13485px] md:leading-[28px] lg:tracking-[-0.13485px] lg:leading-[28px] tracking-[-0.3px] leading-[20px] mt-10 mb-10 text-gray-400">
+            <p className="text-base md:text-2xl lg:text-[23.97px] text-gray-400 mt-10 mb-10">
               Opal uses advanced AI to effortlessly place text behind any image,
               creating visually stunning designs and empowering creators and
               businesses to craft captivating visuals with ease.
@@ -109,7 +108,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Safety Section - Consistent spacing */}
+        {/* Safety Section */}
         <section className="py-20 sm:py-32">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <motion.div
@@ -119,7 +118,7 @@ export default function Home() {
               viewport={{ once: true }}
               className="mx-auto max-w-3xl text-center"
             >
-              <h2 className="mt-2 font-soehne text-4xl sm:text-5xl bg-gradient-to-b from-white to-zinc-500 inline-block text-transparent bg-clip-text">
+              <h2 className="mt-2 text-4xl sm:text-5xl bg-gradient-to-b from-white to-zinc-500 inline-block text-transparent bg-clip-text">
                 Built with safety in mind
               </h2>
               <p className="mt-4 text-lg text-gray-400 mb-8">
@@ -130,7 +129,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* CTA Section - Improved structure */}
+        {/* CTA Section */}
         <section className="py-20 sm:py-32">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <motion.div
@@ -141,7 +140,7 @@ export default function Home() {
               className="mx-auto max-w-5xl rounded-2xl bg-[#171717] px-4 py-16 sm:px-6 sm:py-24 lg:px-8"
             >
               <div className="mx-auto max-w-2xl text-center">
-                <h2 className="font-medium text-xl sm:text-2xl md:text-[36px] leading-[32px] sm:leading-[36px] md:leading-[43.2px] tracking-[-0.2px] sm:tracking-[-0.3px] md:tracking-[-0.36px] mb-4 w-full sm:w-3/4 flex justify-center mx-auto text-center text-h4 text-balance">
+                <h2 className="font-medium text-xl sm:text-2xl mb-4">
                   Enhance Instagram with AI for stunning text-visual content!
                 </h2>
                 <div className="mt-10">
@@ -160,30 +159,6 @@ export default function Home() {
             </motion.div>
           </div>
         </section>
-        <div className="py-20 sm:py-32">
-          <div className="mx-auto max-w-7xl flex flex-col justify-center px-4 sm:px-6 lg:px-8 gap-7">
-            <h1 className="text-2xl lg:text-4xl xl:text-4xl tracking-tight font-medium bg-gradient-to-b from-white to-zinc-500 inline-block text-transparent bg-clip-text ">
-              Opal / Text Behind Imaage <br /> is completely open source.
-            </h1>
-            <p className="text-lg md:text-lg text-gray-400 mb-8">
-              100% of the app&apos;s code is available on Github; check it out and
-              contribute.
-            </p>
-          </div>
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <Button className="rounded-full" size="lg" asChild>
-              <Link href="https://github.com/Rakibulislamsarkar/Text-Behind-Image">
-                Github
-                <ArrowUpRight className="ml-2" size={18} />
-              </Link>
-            </Button>
-            </div>
-        </div>
-            <footer className="mx-auto max-w-7xl flex flex-col justify-center px-4 sm:px-6 lg:px-8 pb-5">
-            <h1 className="text-2xl lg:text-4xl xl:text-4xl tracking-tight font-medium bg-gradient-to-b from-white to-zinc-500 inline-block text-transparent bg-clip-text ">
-            2024 @  All Rights Reserved - Created by Rakibul Islam Sarkar
-            </h1>
-            </footer>
       </main>
     </div>
   );

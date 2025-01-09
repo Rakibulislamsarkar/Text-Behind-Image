@@ -2,17 +2,19 @@
 
 import React, { useState, useRef } from "react";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Accordion } from "@/components/ui/accordion";
 import { ModeToggle } from "@/components/global/mode-toggle";
-import TextCustomizer from "@/components/editor/text-customizer";
 import { PlusIcon, ReloadIcon } from "@radix-ui/react-icons";
 import { removeBackground } from "@imgly/background-removal";
-import {ImageUploader} from '@/components/global/image-uploader'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import "@/app/fonts.css";
+
+// Dynamic imports for browser-specific components
+const TextCustomizer = dynamic(() => import("@/components/editor/text-customizer"), { ssr: false });
 
 interface TextSet {
   id: number;
@@ -32,9 +34,7 @@ interface TextSet {
 const Page = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isImageSetupDone, setIsImageSetupDone] = useState<boolean>(false);
-  const [removedBgImageUrl, setRemovedBgImageUrl] = useState<string | null>(
-    null
-  );
+  const [removedBgImageUrl, setRemovedBgImageUrl] = useState<string | null>(null);
   const [textSets, setTextSets] = useState<Array<TextSet>>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -45,9 +45,7 @@ const Page = () => {
     }
   };
 
-  const handleFileChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       const imageUrl = URL.createObjectURL(file);
@@ -57,14 +55,22 @@ const Page = () => {
   };
 
   const setupImage = async (imageUrl: string) => {
+    if (typeof window === "undefined") return; // Guard for SSR
     try {
       const imageBlob = await removeBackground(imageUrl);
       const url = URL.createObjectURL(imageBlob);
       setRemovedBgImageUrl(url);
       setIsImageSetupDone(true);
     } catch (error) {
-      console.error(error);
+      console.error("Error removing background:", error);
     }
+  };
+
+  const createImageInstance = () => {
+    if (typeof window !== "undefined") {
+      return new window.Image();
+    }
+    throw new Error("Cannot create image instance on the server.");
   };
 
   const addNewTextSet = () => {
@@ -103,48 +109,38 @@ const Page = () => {
     setTextSets((prev) => prev.filter((set) => set.id !== id));
   };
 
-  const createImageInstance = () => {
-    if (typeof window !== "undefined") {
-      return new window.Image();
-    }
-    throw new Error("Cannot create image instance on the server.");
-  };
-  
-
   const saveCompositeImage = () => {
     if (!canvasRef.current || !isImageSetupDone) return;
-  
+
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-  
+
     const bgImg = createImageInstance();
     bgImg.crossOrigin = "anonymous";
     bgImg.onload = () => {
       canvas.width = bgImg.width;
       canvas.height = bgImg.height;
-  
+
       ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
-  
+
       textSets.forEach((textSet) => {
         ctx.save();
-        ctx.font = `${textSet.fontWeight} ${textSet.fontSize * 3}px ${
-          textSet.fontFamily
-        }`;
+        ctx.font = `${textSet.fontWeight} ${textSet.fontSize * 3}px ${textSet.fontFamily}`;
         ctx.fillStyle = textSet.color;
         ctx.globalAlpha = textSet.opacity;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-  
+
         const x = (canvas.width * (textSet.left + 50)) / 100;
         const y = (canvas.height * (50 - textSet.top)) / 100;
-  
+
         ctx.translate(x, y);
         ctx.rotate((textSet.rotation * Math.PI) / 180);
         ctx.fillText(textSet.text, 0, 0);
         ctx.restore();
       });
-  
+
       if (removedBgImageUrl) {
         const removedBgImg = createImageInstance();
         removedBgImg.crossOrigin = "anonymous";
@@ -158,7 +154,7 @@ const Page = () => {
       }
     };
     bgImg.src = selectedImage || "";
-  
+
     function triggerDownload() {
       const dataUrl = canvas.toDataURL("image/png");
       const link = document.createElement("a");
@@ -167,7 +163,6 @@ const Page = () => {
       link.click();
     }
   };
-  
 
   return (
     <div className="flex flex-col h-screen">
@@ -290,12 +285,7 @@ const Page = () => {
               height={200}
               alt="Upload Illustration"
             />
-            <ImageUploader
-              onUploadComplete={(url) => {
-                setSelectedImage(url);
-                setupImage(url);
-              }}
-            />
+            
           </CardContent>
         </Card>
       </div>
