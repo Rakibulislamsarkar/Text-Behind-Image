@@ -166,7 +166,7 @@ export default function Home() {
               Opal / Text Behind Imaage <br /> is completely open source.
             </h1>
             <p className="text-lg md:text-lg text-gray-400 mb-8">
-              100% of the app's code is available on Github; check it out and
+              100% of the app&apos;s code is available on Github; check it out and
               contribute.
             </p>
           </div>
